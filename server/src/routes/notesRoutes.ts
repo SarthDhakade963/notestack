@@ -1,0 +1,19 @@
+import express from "express";
+
+import { authenticate } from "../middleware/authMiddleware";
+import {
+  createNote,
+  deleteNote,
+  getNotes,
+  updateNote,
+} from "../controller/notesController";
+
+const router = express.Router();
+
+router.use(authenticate);
+router.post("/", createNote);
+router.get("/", getNotes);
+router.patch("/:noteId", updateNote);
+router.delete("/:noteId", deleteNote);
+
+export default router;
