@@ -19,7 +19,7 @@ export const register = async (
       where: { email },
     });
 
-    if (!existingUser) {
+    if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
@@ -29,7 +29,7 @@ export const register = async (
       data: {
         name,
         email,
-        password: hashedPassword,
+        hashedPassword,
       },
     });
 
