@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import type { MouseEvent } from "react";
 import {
   Eye,
   EyeOff,
@@ -9,15 +8,19 @@ import {
   Users,
   FileText,
   BookOpen,
-  Sparkles,
-  Shield,
   Zap,
+  Shield,
+  Sparkles,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
 
 export default function AuthPage() {
+  const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
+
+  const [formData, setFormData] = useState<FormDataInterface>({
     name: "",
     email: "",
     password: "",
@@ -27,12 +30,18 @@ export default function AuthPage() {
     setIsLogin(!isLogin);
   };
 
+  interface FormDataInterface {
+    name: string;
+    email: string;
+    password: string;
+  }
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const handleSubmit = async (
-    e: MouseEvent<HTMLButtonElement>,
+    e: React.MouseEvent<HTMLButtonElement>,
     isSignup: boolean
-  ) => {
+  ): Promise<void> => {
     e.preventDefault();
 
     if (!emailRegex.test(formData.email)) {
@@ -40,16 +49,72 @@ export default function AuthPage() {
       return;
     }
 
-    alert(isSignup ? "Account created successfully!" : "Login successful!");
+    try {
+      if (isSignup) {
+        // Signup
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/signup`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+          }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.message || "Registration failed");
+          return;
+        }
+
+        console.log("Signup successful:", data);
+
+        const loginResult = await signIn("credentials", {
+          redirect: false,
+          email: formData.email,
+          password: formData.password,
+        });
+
+        if (loginResult?.error) {
+          alert("Login after signup failed");
+          return;
+        }
+
+        router.push("/dashboard");
+        return;
+      }
+
+      // Login
+      const result = await signIn("credentials", {
+        redirect: false,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (result?.error) {
+        alert("Invalid credentials");
+      } else {
+        alert("Login successful!");
+        router.push("/dashboard");
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred");
+    }
   };
 
   return (
     <div className="flex min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Left Panel - Hero Section */}
       <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-blue-600 via-indigo-600 to-purple-700 flex-col items-center justify-center p-12 relative overflow-hidden">
+        {/* Animated Background Elements */}
         <div className="absolute top-20 left-20 w-72 h-72 bg-blue-400 rounded-full opacity-30 blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-400 rounded-full opacity-20 blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-300 rounded-full opacity-25 blur-2xl animate-pulse delay-2000"></div>
 
+        {/* Floating Particles */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute w-2 h-2 bg-white rounded-full opacity-20 animate-pulse top-10 left-10"></div>
           <div className="absolute w-2 h-2 bg-white rounded-full opacity-20 animate-pulse top-20 left-1/4 delay-500"></div>
@@ -62,20 +127,25 @@ export default function AuthPage() {
         </div>
 
         <div className="relative z-10 text-center max-w-xl">
+          {/* Logo */}
           <div className="flex items-center justify-center mb-8 group">
             <div className="bg-white p-5 rounded-3xl shadow-2xl transform transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
               <GraduationCap className="w-14 h-14 text-blue-600" />
             </div>
           </div>
 
+          {/* Title */}
           <h1 className="text-7xl font-black mb-6 text-white tracking-tight">
             NodeStack
           </h1>
 
+          {/* Subtitle */}
           <p className="text-2xl text-blue-50 mb-12 leading-relaxed font-light">
-            Organize your thoughts with elegance and ease.
+            Your comprehensive platform for managing notes with style and
+            efficiency
           </p>
 
+          {/* Feature Image Placeholder */}
           <div className="relative mb-10 group">
             <div className="absolute inset-0 bg-linear-to-r from-blue-400 to-purple-400 rounded-3xl opacity-30 blur-2xl group-hover:opacity-40 transition-opacity duration-300"></div>
             <div className="relative z-10 bg-white/10 backdrop-blur-lg rounded-3xl p-12 border border-white/20 shadow-2xl">
@@ -208,6 +278,14 @@ export default function AuthPage() {
                   </div>
                 </div>
 
+                {isLogin && (
+                  <div className="flex justify-end">
+                    <button className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-200">
+                      Forgot password?
+                    </button>
+                  </div>
+                )}
+
                 <button
                   onClick={(e) => handleSubmit(e, !isLogin)}
                   className="w-full py-4 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-1 mt-8 text-lg"
@@ -218,7 +296,7 @@ export default function AuthPage() {
 
               {/* Toggle Mode */}
               <div className="mt-10 text-center">
-                <p className="text-gray-600 text-[15px]">
+                <p className="text-gray-600 text-lg">
                   {isLogin
                     ? "Don't have an account?"
                     : "Already have an account?"}{" "}

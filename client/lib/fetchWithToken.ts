@@ -15,7 +15,8 @@ export async function fetchWithToken(
 
     if (!session?.accessToken) {
       console.warn("⚠️ No valid session found. Signing out...");
-      await signOut({ redirect: true });
+      // Redirect the user to the auth page after sign out
+      await signOut({ redirect: true, callbackUrl: "/" });
       throw new Error("No access token found. Please sign in again.");
     }
 
@@ -34,7 +35,8 @@ export async function fetchWithToken(
 
     if (response.status === 401) {
       console.warn("🔒 Token expired or unauthorized. Signing out...");
-      await signOut({ redirect: true });
+      // Token likely expired — sign the user out and redirect to auth
+      await signOut({ redirect: true, callbackUrl: "/auth" });
       throw new Error("Session expired. Please log in again.");
     }
 

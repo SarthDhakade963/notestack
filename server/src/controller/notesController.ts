@@ -143,3 +143,48 @@ export const deleteNote = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const getDashboardStats = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.id;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "User does not exist" });
+    }
+
+    const totalNotes = await prisma.note.count({
+      where: { userId },
+    });
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const thisWeek = await prisma.note.count({
+      where: {
+        userId,
+        createdAt: {
+          gte: sevenDaysAgo,
+        },
+      },
+    });
+
+    const lastUpdatedNote = await prisma.note.findFirst({
+      where: { userId },
+      orderBy: { updatedAt: "desc" },
+      select: { updatedAt: true },
+    });
+
+    return res.status(200).json({
+      totalNotes,
+      thisWeek,
+      lastUpdated: lastUpdatedNote?.updatedAt || null,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
