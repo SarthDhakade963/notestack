@@ -1,7 +1,3 @@
-Absolutely, Sarthak — here’s a **polished, professional README.md** tailored for your project using **Next.js, NextAuth, Express, and SWR**, written in a tone that fits a candidate portfolio or internship submission 👇
-
----
-
 # 🧠 **NoteWise – Smart Notes Dashboard**
 
 > _Your all-in-one, scalable, and secure note management platform — designed to make note-taking simple, organized, and stylish._
@@ -126,7 +122,6 @@ The app follows a **modular monorepo-style architecture**, separating frontend a
 
 ### Future Scalability Plan:
 
-- Introduce **microservices** for authentication and notes
 - Add **Redis caching** for frequent queries (like dashboard stats)
 - Integrate **Cloud Storage (AWS S3)** for file uploads
 - Implement **role-based access control (RBAC)** for multi-user features
@@ -139,7 +134,7 @@ The app follows a **modular monorepo-style architecture**, separating frontend a
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/notewise.git
+git clone https://github.com/SarthDhakade963/notestack.git
 cd notewise
 ```
 
@@ -163,7 +158,8 @@ And a `.env` file for Express backend:
 
 ```env
 DATABASE_URL=your_database_url
-JWT_SECRET=your_jwt_secret
+JWT_ACCESS_SECRET=your_jwt_access_secret
+JWT_REFRESH_SECRET=your_jwt_refresh_secret
 PORT=5000
 ```
 
@@ -194,14 +190,6 @@ To import the Postman collection:
 2. Click _Import_
 3. Select `docs/postman_collection.json`
 4. Explore and test the API routes
-
----
-
-## 🧑‍💻 **Author**
-
-**Sarthak Dhakade**
-Full Stack Developer | Next.js | Java Spring | DevOps Enthusiast
-🌐 [GitHub](https://github.com/SarthDhakade963) | 💼 [LinkedIn](https://linkedin.com/in/sarthak-dhakade)
 
 ---
 
